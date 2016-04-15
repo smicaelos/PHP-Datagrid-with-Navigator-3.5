@@ -10,7 +10,7 @@ declare(strict_types=1);
 <meta http-equiv="Content-Style-Type" content="text/css" />
 
 <title>
-.:::DataGrid_Nav 2.0 by S&eacute;rgio Soares 2016 Update for PHP 7.0.4:::.
+.:::DataGrid_Nav 3.0 Author: S&eacute;rgio Soares 2016 Update for PHP 7.0.4:::.
 </title>
 
 <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
@@ -22,7 +22,7 @@ declare(strict_types=1);
 	<tr>
 		<td align="center"><font color="#8585ad"><p><h1><b>PHP DataGrid with Navigator 3.0</b></h1></p>
 							<p><h3>Update for PHP 7.0.4</h3></p>
-							<h4><p>By S&eacute;rgio Soares 2016</p></h4>
+							<h4><p>Author: S&eacute;rgio Soares 2016</p></h4>
 							<p>It's freeware, if you like it, you can use it in own your projects!</p>
 							<p><b>Please consider Donating through</b></p>
 							<p><h2>PAYPAL</h2></p>
@@ -30,7 +30,15 @@ declare(strict_types=1);
 							<p>&nbsp;</p>
 			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 			<input type="hidden" name="cmd" value="_s-xclick">
-			<input type="hidden" name="hosted_button_id" value="T3W7XYMQ7K842">
+			<input type="hidden" name="hosted_button_id" value="LZ9V7TBL4STZ6">
+			<table>
+			<tr><td><input type="hidden" name="on0" value="Quantity">Quantity</td></tr><tr><td><select name="os0">
+				<option value="Option 1">Option 1 €2,50 EUR</option>
+				<option value="Option 2">Option 2 €3,50 EUR</option>
+				<option value="Option 3">Option 3 €5,00 EUR</option>
+			</select> </td></tr>
+			</table>
+			<input type="hidden" name="currency_code" value="EUR">
 			<input type="image" src="https://www.paypalobjects.com/en_GB/i/btn/btn_paynowCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online.">
 			<img alt="" border="0" src="https://www.paypalobjects.com/pt_PT/i/scr/pixel.gif" width="1" height="1">
 			</form>
@@ -43,17 +51,17 @@ declare(strict_types=1);
 		
 <?php
 /**
- * @author SÃ©rgio Soares 2016
+ * @author Sergio Soares 2016
  *
  * email serguiomicaelo@gmail.com
  *
- * "datagrid_nav 2.0"
+ * "PHP datagrid with navigator 3.0"
  *
  * The class datagrid.class.php was written using PHP 7.0.4
  * You can use it at your will, it's free to use!
  *
  *ATTENTION, before you start this index.php you should start it as
- * "http://localhost/your datagrid_nav_2.0 folder/index.php?page=1&bindex=1&i=1" in the URL of
+ * "http://localhost/your_datagrid_nav_30_folder/index.php?page=1&bindex=1&i=1" in the URL of
  * your Browser!!!
  *
  *
