@@ -33,7 +33,7 @@ class datagrid {
 	 */
 	private function template_db() {
 
-		$connection = mysqli_connect("127.0.0.1","root","sergio321", "datagrid") or die("Erro: " .mysqli_error());
+		$connection = mysqli_connect("127.0.0.1","root","", "datagrid") or die("Erro: " .mysqli_error());
 
 		$sql="select * from products where id='".$this->arr[$this->registo_index-1]."'";
 
