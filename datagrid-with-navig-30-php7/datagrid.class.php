@@ -65,7 +65,7 @@ class datagrid {
 	 */
 	private function get_num_rows() {
 		
-		$connection = mysqli_connect("127.0.0.1","root","sergio321", "datagrid");
+		$connection = mysqli_connect("127.0.0.1","root","", "datagrid");
 
 		$sql="select * from products";
 
@@ -84,7 +84,7 @@ class datagrid {
 
 		$index="0";
 
-		$connection = mysqli_connect("127.0.0.1","root","sergio321", "datagrid") or die("Erro: " .mysqli_error());
+		$connection = mysqli_connect("127.0.0.1","root","", "datagrid") or die("Erro: " .mysqli_error());
 
 		$sql="select * from products";
 
