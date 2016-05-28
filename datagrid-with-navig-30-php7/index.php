@@ -70,20 +70,24 @@ declare(strict_types=1);
 
 require("datagrid.class.php");
 
-$page = (int)$_GET['page'];
 
 
 //parameter variables:
+$page = $_GET['page'] ?? 1; //PHP 7 ONLY!
+//$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+
 $rows = 4;
 $cols = 2;
-$paint_rows = TRUE;
+$multipleColors = TRUE;
 $num_visible_frames = 5;
 
-$newTable=new datagrid();
-
-$newTable->doTable($cols, $rows, $page, $paint_rows);
-
-$newTable->navigation($page, $num_visible_frames);
+//instanciate datagrid class.
+$newTable=new datagrid((int)$page,$rows,$cols,$multipleColors,$num_visible_frames);
+//renders the datagrid.
+$newTable->drawTable();
+//renders the navigator.
+$newTable->navigator();
 
 ?>
 </td></tr>

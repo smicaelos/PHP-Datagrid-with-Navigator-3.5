@@ -1,30 +1,61 @@
 <?php
 declare(strict_types=1);
+
+// Include MySQL class
+require('inc/basicmysql.class.php');
+// Include database connection
+require('inc/global.inc.php');
+
 /**
  * @author Sérgio Soares 2016
  * 
  * email serguiomicaelo@gmail.com
  * 
- * "PHP datagrid with navigator 3.0"
+ * "PHP datagrid with navigator 4.0"
  * 
- * datagrid.class.php Update for PHP 7.0.4
- * 
- * This class was written using PHP 7.0.4
- * You can use it at your will, it's free to use!
- *
+ * datagrid.class.php Update for PHP 7
  *
  */
+
 class datagrid {
 
- private $cols;
+ private $page;
  private $rows;
- private $page = "";
- private $index = "1";
- private $arr = array();
- private $paint_grid = TRUE;
- private $registo_index = "1";
-
-	
+ private $cols;
+ private $multipleColors;
+ private $num_visible_frames;
+ 
+ private $index;
+ private $arr;
+ private $registo_index;
+ 
+ private $numPage;
+ 
+ //mysql array:
+ private $mysqlString;
+ 
+		/**
+		 * datagrid constructor
+		 * 
+		 * @param int $page = page index number.
+		 * @param int $rows = number of rows.
+		 * @param int $cols = number of collums.
+		 * @param bool $multipleColors = for using two diferent colors on row tables if (TRUE).
+		 * @param int $num_visible_frames = number of pages to show in navigator between <<prev>> & <<next>> links.
+		 */
+		public function __construct(int $page, int $rows, int $cols, bool $multipleColors,int $num_visible_frames){
+				 	$this->rows=$rows;
+				 	$this->cols=$cols;
+				 	$this->multipleColors=$multipleColors;
+				 	$this->num_visible_frames=$num_visible_frames;
+				 	$this->registo_index=$page;
+				 	$this->page = $this->registo_index;
+				 	
+				 	//MySQL Srings:
+				 	
+				 	
+		}
+ 
 	/**
 	 * @return string
 	 * 
@@ -32,106 +63,108 @@ class datagrid {
 	 * 
 	 */
 	private function template_db() {
-
-		$connection = mysqli_connect("127.0.0.1","root","", "datagrid") or die("Erro: " .mysqli_error());
-
-		$sql="select * from products where id='".$this->arr[$this->registo_index-1]."'";
-
-		$result=mysqli_query($connection, $sql);
-
-		if (!defined('TABLE')) define ('TABLE',['id','url','title','text','price']);
-
-		while ($sqlReg=mysqli_fetch_array($result)) {
-			
-				return "<table Border='0' cellspacing='10' cellpadding='0' width='300'>
-					<tr>
-						<td rowspan='3'><img src=" . $sqlReg[TABLE[1]] . " height='100'></td>
-						<td colspan='2' cellspacing='0'><b><font size='4'>".$sqlReg[TABLE[2]]."</font></b></td>
-					</tr>
-						<tr><td colspan='2'>".$sqlReg[TABLE[3]]."</td>
-					</tr>
-						<tr><td><b><font color='white'>Price: </b></font>".$sqlReg[TABLE[4]]."€</td>
-						<td>chart</td>
-					</tr>
-					</table>";
-		}
+		global $DB;
 		
-	}
+		$result = $DB->query("SELECT url, title, text, price FROM products WHERE id='".$this->arr[$this->registo_index-1]."'");
+		
+		if (!defined('TABLE')) define ('TABLE',['url','title','text','price']);
 
-	
+			while ($sqlReg=$result->fetch()) {
+				
+					return "<table Border='0' cellspacing='10' cellpadding='0' width='300'>
+						<tr>
+							<td rowspan='3'><img src=" . $sqlReg[TABLE[0]] . " height='100'></td>
+							<td colspan='2' cellspacing='0'><b><font size='4'>".$sqlReg[TABLE[1]]."</font></b></td>
+						</tr>
+							<tr><td colspan='2'>".$sqlReg[TABLE[2]]."</td>
+						</tr>
+							<tr><td><b><font color='white'>Price: </b></font>".$sqlReg[TABLE[3]]."€</td>
+							<td>chart</td>
+						</tr>
+						</table>";
+			}
+	}
 
 	/**
 	 * @return Total of mysql table records
 	 */
+	
 	private function get_num_rows() {
 		
-		$connection = mysqli_connect("127.0.0.1","root","", "datagrid");
+		global $DB;
+		
+		if ($result = $DB->query('SELECT id FROM products')) {
 
-		$sql="select * from products";
+			$row_cnt = $result->size();
 
-		$result=mysqli_query($connection, $sql);
-
-		$total_records = mysqli_num_rows($result);
-
-		return $total_records;
-
+		}
+		
+		return $row_cnt;
 	}
-
+	
 	/**
 	 * fetchs var $arr
 	 */
-	private function fill_array() {
+	private function fetch() {
 
+		global $DB;
 		$index="0";
 
-		$connection = mysqli_connect("127.0.0.1","root","", "datagrid") or die("Erro: " .mysqli_error());
-
-		$sql="select * from products";
-
-		$result=mysqli_query($connection, $sql);
-
-		while ($sqlReg=mysqli_fetch_array($result)) {
-
-			$this->arr[$index] = $sqlReg['id'];
+		if ($result = $DB->query("SELECT id FROM products")) {
 			
-			$index++;
-
+			while ($row = $result->fetch()) {
+	
+				$this->arr[$index] = $row['id'];
+				
+				$index++;
+	
+			}
+			
 		}
 
 	}
 
-
 	/**
-	 * This function makes the construction of full output datagrid table.
+	 * @return # of records left
+	 */
+	private function findRecsLeft() {
+	
+		$totalRec=($this->rows*$this->cols);
+		$numRows=$this->get_num_rows();
+		
+		$numPag=floor($numRows/$totalRec)+1;
+		$this->numPage = $numPag;
+		
+		$numMaxPage=$totalRec*$numPag;
+		$rowsLeft=$numMaxPage-$numRows;
+		$recsLeft=$totalRec-$rowsLeft;
+	
+		return $recsLeft;
+		
+	}
+	
+	
+	/**
+	 * This function builds full output datagrid table.
 	 * 
-	 * @param  $cols -> number of collums.
+	 * @param  $cols = number of collums.
 	 * 
-	 * @param  $rows -> number of rows.
+	 * @param  $rows = number of rows.
 	 * 
-	 * @param  $index -> get number of the page with $_GET['page'] to get 
+	 * @param  $index = get number of the page with $_GET['page'] to get 
 	 * the page number on url "&page="datagrid page number".
 	 * 
 	 * @param  $paint -> Boolean, if true, it returns each pair number of the row with a second color.
 	 */
-	public function doTable(int $cols, int $rows, int $index, bool $paint) {
-
-		$this->cols=$cols;
-		$this->rows=$rows;
-		$this->registo_index=$index;
-		$this->paint_grid=$paint;
-		$col_index="1";
-		$totalRec=($this->rows*$this->cols);
-		$numRows=$this->get_num_rows();
-		$lastPageN=$_GET['i'];
+	public function drawTable() {
 		
-		$numPag=floor($numRows/$totalRec)+1;
-		$numMaxPage=$totalRec*$numPag;
-		$rowsLeft=$numMaxPage-$numRows;
-		$recsLeft=$totalRec-$rowsLeft;
+		$lastPageN=isset($_GET['i']) ? (int)$_GET['i'] : 1;
 		
-		$this->fill_array();
+		$col_index=1;
+		$recsLeft = $this->findRecsLeft();
+		$this->fetch();
 
-		if ($this->registo_index=="") {
+		if ($this->registo_index==null) {
 
 			$this->registo_index=1;
 
@@ -145,7 +178,7 @@ class datagrid {
 			
 			for ($c=1; $c<=$this->cols; $c++) {
 				
-				if ($this->paint_grid) {
+				if ($this->multipleColors) {
 				
 					if ($col_index > $this->cols*2) {
 						$col_index="1";
@@ -157,14 +190,13 @@ class datagrid {
 	
 							echo("<td bgcolor=#7c7c7c>".$this->template_db()."</td>\r");
 							
-							
 						} else {
 	
 							echo("<td bgcolor=#8c8c8c>".$this->template_db()."</td>\r");
 							
 						}
 						
-						if ($numPag == $lastPageN){
+						if ($this->numPage == $lastPageN){
 							
 							$recsLeft--;
 							
@@ -172,15 +204,15 @@ class datagrid {
 						
 					}
 
-					$this->registo_index+=1;
-					$col_index +=1;
+					$this->registo_index++;
+					$col_index ++;
 
 				} else {
 
 					if ($recsLeft > 0) {
 						
 						echo("<td>".$this->template_db()."</td>\r");
-						$this->registo_index +=1;
+						$this->registo_index ++;
 						$recsLeft--;
 						
 					}
@@ -197,15 +229,21 @@ class datagrid {
 
 
 	/**
+	 * This function it's for navigating the datagrid's pages.
+	 * 
 	 * @param $page -> get number of the page with $_GET['page'] to get 
 	 * the page number on url "&page="datagrid page number".
 	 * 
 	 * @param $num -> you can choose how much pages represented by a page number will appear into the 
 	 * navigator, between "prev" and "Next" link buttons.
 	 */
-	public function navigation(int $page, int $num) {
+	public function navigator() {
 		
-		$this->page = $page;
+		(int)$url_i_var = $_GET['i'] ?? 1; //php 7 only!
+		(int)$url_bindex_var = $_GET['bindex'] ?? 1; //php 7 only!
+		//$url_i_var = isset($_GET['i']) ? (int)$_GET['i'] : 1;
+		//$url_bindex_var = isset($_GET['bindex']) ? (int)$_GET['bindex'] : 1;
+		
 		$group_index = 1;
 
 		if ($this->get_num_rows() < ($this->rows*$this->cols)) {
@@ -218,14 +256,14 @@ class datagrid {
 
 		}
 
-		if ($_GET['i'] > 1) {
+		if ($url_i_var > 1) {
 
-			$a=$_GET['i']-1;
+			$a=$url_i_var-1;
 
-			$index = $_GET['bindex']-1;
+			$index = $url_bindex_var-1;
 			$page_prev = $this->page-($this->rows*$this->cols);
 
-			if ($_GET['bindex'] <= 1) {
+			if ($url_bindex_var <= 1) {
 
 				echo "<a href=index.php?page=".$page_prev."&bindex=1&i=".$a.">Prev</a>\n";
 
@@ -240,22 +278,22 @@ class datagrid {
 			
 			$limit = $this->get_num_rows();
 			
-			if ($_GET['bindex']=="") {
+			if ($url_bindex_var == null) {
 
 				$this->index = 1;
 
 			} else {
-				if ($num_pag > $num) {
-					if ($_GET['i'] > floor($num/2)) {
-						$this->index = $_GET['i']-floor($num/2);
+				if ($num_pag > $this->num_visible_frames) {
+					if ($url_i_var > floor($this->num_visible_frames/2)) {
+						$this->index = $url_i_var-floor($this->num_visible_frames/2);
 					} 
 				} else {
 
-				$this->index = $_GET['bindex'];
+				$this->index = $url_bindex_var;
 				}
 			}
 			
-			for ($r=1; $r <= $num; $r++) {
+			for ($r=1; $r <= $this->num_visible_frames; $r++) {
 
 				$group_index=$this->index-$r+1;
 				
@@ -271,7 +309,7 @@ class datagrid {
 				
 				if ($pag <= $limit) {
 
-					if ($_GET['i'] == $this->index) {
+					if ($url_i_var == $this->index) {
 
 						echo "| <a href=index.php?page=".$pag."&bindex=".$group_index."&i=".$this->index."><b><font color='green'>$this->index</font></b></a> | ";
 	
@@ -283,29 +321,29 @@ class datagrid {
 
 				}
 
-				$this->index+=1;
+				$this->index++;
 
 			}
 
 		}
 
-		if ($_GET['i'] < $num_pag-1) {
+		if ($url_i_var < $num_pag-1) {
 
-			$last_set = ($num_pag - $num);
+			$last_set = ($num_pag - $this->num_visible_frames);
 
-			if ($_GET['i'] == "") {
+			if ($url_i_var == "") {
 			
 				$i = 2;
 
 			} else {
 
-				$i=$_GET['i'] + 1;
+				$i=$url_i_var + 1;
 
 			}			
 
-			if ($_GET['bindex'] == "") {
+			if ($url_bindex_var == null) {
 
-				if ($num_pag > $num) {
+				if ($num_pag > $this->num_visible_frames) {
 
 					$index = 2;
 
@@ -317,19 +355,19 @@ class datagrid {
 
 			} else {
 
-				if ($num_pag > $num) {
+				if ($num_pag > $this->num_visible_frames) {
 
-					$index = $_GET['bindex']+1;
+					$index = $url_bindex_var+1;
 
 				} else {
 
-					$index = $_GET['bindex'];
+					$index = $url_bindex_var;
 
 				}
 
 			}
 
-  			if ($this->page == "") {
+  			if ($this->page == null) {
 
   				$page_next=$this->page+(($this->rows*$this->cols)+1);
   	
@@ -349,15 +387,9 @@ class datagrid {
 
   			}
 
-
 		}
-
-
-
 
 	}
 
 }
-
-
 ?>
