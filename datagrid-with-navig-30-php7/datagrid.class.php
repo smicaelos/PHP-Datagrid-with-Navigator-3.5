@@ -2,9 +2,9 @@
 declare(strict_types=1);
 
 // Include MySQL class
-require_once('inc/basicmysql.class.php');
+require('inc/basicmysql.class.php');
 // Include database connection
-require_once('inc/global.inc.php');
+require('inc/global.inc.php');
 
 /**
  * @author Sérgio Soares 2016
