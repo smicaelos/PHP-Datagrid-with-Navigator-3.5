@@ -1,3 +1,6 @@
+<?php 
+declare(strict_types=1);
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -7,7 +10,7 @@
 <meta http-equiv="Content-Style-Type" content="text/css" />
 
 <title>
-.:::PHP DataGrid with Navigator 3.0 Author: S&eacute;rgio Soares 2016 Update for PHP 5:::.
+.:::DataGrid_Nav 3.0 Author: S&eacute;rgio Soares 2016 Update for PHP 7.0.4:::.
 </title>
 
 <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
@@ -18,7 +21,7 @@
 <table>
 	<tr>
 		<td align="center"><font color="#8585ad"><p><h1><b>PHP DataGrid with Navigator 3.0</b></h1></p>
-							<p><h3>Update for PHP 5</h3></p>
+							<p><h3>Update for PHP 7.0.4</h3></p>
 							<h4><p>Author: S&eacute;rgio Soares 2016</p></h4>
 							<p>It's freeware, if you like it, you can use it in own your projects!</p>
 							<p><b>Please consider Donating through</b></p>
@@ -54,7 +57,7 @@
  *
  * "PHP datagrid with navigator 3.0"
  *
- * The class datagrid.class.php was written using PHP 5
+ * The class datagrid.class.php was written using PHP 7.0.4
  * You can use it at your will, it's free to use!
  *
  *ATTENTION, before you start this index.php you should start it as
@@ -67,20 +70,24 @@
 
 require("datagrid.class.php");
 
-$page = $_GET['page'];
 
 
 //parameter variables:
+$page = $_GET['page'] ?? 1; //PHP 7 ONLY!
+//$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+
 $rows = 4;
 $cols = 2;
-$paint_rows = TRUE;
+$multipleColors = TRUE;
 $num_visible_frames = 5;
 
-$newTable=new datagrid();
-
-$newTable->doTable($cols, $rows, $page, $paint_rows);
-
-$newTable->navigation($page, $num_visible_frames);
+//instanciate datagrid class.
+$newTable=new datagrid((int)$page,$rows,$cols,$multipleColors,$num_visible_frames);
+//renders the datagrid.
+$newTable->drawTable();
+//renders the navigator.
+$newTable->navigator();
 
 ?>
 </td></tr>
